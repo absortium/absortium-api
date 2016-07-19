@@ -4,8 +4,11 @@ import requests
 
 from absortium.auth import HMACAuth
 from absortium.compat import imap, urljoin, quote
-from absortium.services import Account, Withdrawal, Order
+from absortium.services import Account, Withdrawal, Order, Deposit
 from absortium.util import encode_params
+from core.utils.logging import getPrettyLogger
+
+__author__ = 'andrew.shvv@gmail.com'
 
 ABSORTIUM_CRT_PATH = os.path.join(
     os.path.dirname(os.path.realpath(__file__)), 'ca-absortium.crt')
@@ -13,7 +16,16 @@ ABSORTIUM_CRT_PATH = os.path.join(
 ABSORTIUM_CALLBACK_PUBLIC_KEY_PATH = os.path.join(
     os.path.dirname(os.path.realpath(__file__)), 'absortium-callback.pub')
 
-__author__ = 'andrew.shvv@gmail.com'
+logger = getPrettyLogger(__name__)
+
+_client = None
+
+
+def get_absortium_client(*args, **kwargs):
+    global _client
+    if _client is None:
+        _client = Client(*args, **kwargs)
+    return _client
 
 
 class Client():
@@ -46,9 +58,10 @@ class Client():
         # Set up a requests session for interacting with the API.
         self.session = self._build_session(HMACAuth, api_key, api_secret, self.API_VERSION)
 
-        self.order = Order(self)
-        self.withdrawal = Withdrawal(self)
-        self.account = Account(self)
+        self.orders = Order(self)
+        self.withdrawals = Withdrawal(self)
+        self.deposits = Deposit(self)
+        self.accounts = Account(self)
 
     def _build_session(self, auth_class, *args, **kwargs):
         """Internal helper for creating a requests `session` with the correct
@@ -62,8 +75,9 @@ class Client():
 
     def _create_api_uri(self, *parts):
         """Internal helper for creating fully qualified endpoint URIs."""
-        parts += ('/',)
-        return urljoin(self.BASE_API_URI, '/'.join(imap(quote, parts)))
+
+        parts = [str(part) for part in parts]
+        return urljoin(self.BASE_API_URI, '/'.join(imap(quote, parts)) + '/')
 
     def _request(self, method, *relative_path_parts, **kwargs):
         """Internal helper for creating HTTP requests to the ethwallet API.
@@ -84,7 +98,10 @@ class Client():
         return self._handle_response(response)
 
     def _handle_response(self, response):
-        return response.json()
+        if response.status_code in [201, 200]:
+            return response.json()
+        else:
+            return response.content
 
     def get(self, *args, **kwargs):
         return self._request('get', *args, **kwargs)

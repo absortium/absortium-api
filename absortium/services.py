@@ -14,7 +14,7 @@ class Withdrawal(Base):
             'currency': currency
         }
 
-        return self.client.get('api', 'withdrawals', data=params)
+        return self.client.get('api', 'withdrawals', params=params)
 
     def create(self, amount, address):
         data = {
@@ -31,7 +31,7 @@ class Deposit(Base):
             'currency': currency
         }
 
-        return self.client.get('api', 'deposits', data=params)
+        return self.client.get('api', 'deposits', params=params)
 
 
 class Order(Base):
@@ -63,13 +63,14 @@ class Order(Base):
             'type': order_type,
             'pair': pair,
         }
-        return self.client.get('api', 'orders', data=params)
+        return self.client.get('api', 'orders', params=params)
 
     def update(self,
                pk,
                price,
                amount=None,
-               total=None):
+               total=None,
+               **kwargs):
         data = {
             'price': price,
             'amount': amount,
@@ -77,19 +78,19 @@ class Order(Base):
         }
         return self.client.put('api', 'orders', pk, data=data)
 
-    def cancel(self, pk):
+    def cancel(self, pk, **kwargs):
         return self.client.delete('api', 'orders', pk)
 
     def approve(self, pk):
-        return self.client.delete('api', 'orders', pk, 'approve')
+        return self.client.approve('api', 'orders', pk, 'approve')
 
 
 class Account(Base):
     def list(self):
         return self.client.get('api', 'accounts')
 
-    def retrieve(self, pk):
-        return self.client.post('api', 'accounts', pk)
+    def retrieve(self, currency):
+        return self.client.get('api', 'accounts', currency)
 
     def create(self, currency):
         data = {'currency': currency}
