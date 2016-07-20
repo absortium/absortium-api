@@ -4,6 +4,7 @@ import requests
 
 from absortium.auth import HMACAuth
 from absortium.compat import imap, urljoin, quote
+from absortium.error import build_api_error
 from absortium.services import Account, Withdrawal, Order, Deposit
 from absortium.util import encode_params
 from core.utils.logging import getPrettyLogger
@@ -98,10 +99,9 @@ class Client():
         return self._handle_response(response)
 
     def _handle_response(self, response):
-        if response.status_code in [201, 200]:
-            return response.json()
-        else:
-            return response.content
+        if not str(response.status_code).startswith('2'):
+            raise build_api_error(response)
+        return response.json()
 
     def get(self, *args, **kwargs):
         return self._request('get', *args, **kwargs)
