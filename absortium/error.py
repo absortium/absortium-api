@@ -33,22 +33,25 @@ class NotFoundError(APIError): pass
 class InternalServerError(APIError): pass
 
 
-class PermissionDenied(APIError): pass
+class PermissionDeniedError(APIError): pass
 
 
-class NotEnoughMoney(APIError): pass
+class NotEnoughMoneyError(APIError): pass
 
 
-class LockFailure(APIError): pass
+class LockFailureError(APIError): pass
 
 
-class UnlockFailure(APIError): pass
+class UnlockFailureError(APIError): pass
 
 
-class AlreadyExist(APIError): pass
+class UpdateFailureError(APIError): pass
 
 
-class NotAllowed(APIError): pass
+class AlreadyExistError(APIError): pass
+
+
+class NotAllowedError(APIError): pass
 
 
 def build_api_error(response):
@@ -69,12 +72,13 @@ def build_api_error(response):
 _error_id_to_class = {
     'not_found': NotFoundError,
     'internal_server_error': InternalServerError,
-    'permission_denied': PermissionDenied,
-    'not_enough_money': NotEnoughMoney,
-    'lock_failure': LockFailure,
-    'unlock_failure': UnlockFailure,
-    'already_exist': AlreadyExist,
-    'not_allowed': NotAllowed,
+    'permission_denied': PermissionDeniedError,
+    'not_enough_money': NotEnoughMoneyError,
+    'lock_failure': LockFailureError,
+    'unlock_failure': UnlockFailureError,
+    'update_failure': UpdateFailureError,
+    'already_exist': AlreadyExistError,
+    'not_allowed': NotAllowedError,
     'validation_error': ValidationError,
     'authentication_error': AuthenticationError,
 }

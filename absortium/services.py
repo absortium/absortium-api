@@ -1,3 +1,5 @@
+import time
+
 from absortium import constants
 
 __author__ = 'andrew.shvv@gmail.com'
@@ -6,6 +8,18 @@ __author__ = 'andrew.shvv@gmail.com'
 class Base():
     def __init__(self, client):
         self.client = client
+
+
+def timing(func):
+    def decorator(*args, **kwargs):
+        ts = time.time()
+        result = func(*args, **kwargs)
+        te = time.time()
+
+        print('{} - {} sec - (price - {} , amount - {})'.format(func.__name__, te - ts, kwargs.get('price'), kwargs.get('amount')))
+        return result
+
+    return decorator
 
 
 class Withdrawal(Base):
@@ -81,8 +95,14 @@ class Order(Base):
     def cancel(self, pk, **kwargs):
         return self.client.delete('api', 'orders', pk)
 
-    def approve(self, pk):
-        return self.client.approve('api', 'orders', pk, 'approve')
+    def approve(self, pk, **kwargs):
+        return self.client.post('api', 'orders', pk, 'approve')
+
+    def lock(self, pk, **kwargs):
+        return self.client.post('api', 'orders', pk, 'lock')
+
+    def unlock(self, pk, **kwargs):
+        return self.client.post('api', 'orders', pk, 'unlock')
 
 
 class Account(Base):
