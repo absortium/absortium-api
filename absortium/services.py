@@ -30,10 +30,11 @@ class Withdrawal(Base):
 
         return self.client.get('api', 'withdrawals', params=params)
 
-    def create(self, amount, address):
+    def create(self, amount, address, currency):
         data = {
             'amount': amount,
-            'address': address
+            'address': address,
+            'currency': currency
         }
 
         return self.client.post('api', 'withdrawals', data=data)
